@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>產品單位換算計算機</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Noto Sans TC',sans-serif;
+    background:#f5f4f0;
+    color:#2c2c2a;
+    min-height:100vh;
+    padding:24px 16px;
+  }
+  h1{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#888780;
+    margin-bottom:20px;
+  }
+  .card{
+    background:#fff;
+    border:1px solid #e0dfd8;
+    border-radius:12px;
+    padding:16px 20px;
+    margin-bottom:12px;
+  }
+  .section-title{
+    font-size:11px;
+    font-weight:600;
+    color:#b4b2a9;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    margin-bottom:14px;
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .row:last-child{margin-bottom:0}
+  label{
+    font-size:13px;
+    color:#5f5e5a;
+    min-width:100px;
+    flex-shrink:0;
+  }
+  input[type=number]{
+    flex:1;
+    min-width:0;
+    padding:8px 10px;
+    border:1px solid #e0dfd8;
+    border-radius:8px;
+    font-size:14px;
+    font-family:inherit;
+    color:#2c2c2a;
+    background:#faf9f7;
+    outline:none;
+    transition:border-color .15s;
+  }
+  input[type=number]:focus{border-color:#888780}
+  input.big{font-size:20px;font-weight:600;padding:10px 12px}
+  .unit{font-size:12px;color:#b4b2a9;white-space:nowrap;min-width:50px}
+  .pallet-hint{
+    font-size:12px;
+    color:#b4b2a9;
+    padding-left:110px;
+    margin-top:-4px;
+    margin-bottom:10px;
+  }
+
+  /* tabs */
+  .tab-row{display:flex;gap:8px;margin-bottom:12px}
+  .tab{
+    flex:1;
+    padding:9px 0;
+    font-size:13px;
+    font-family:inherit;
+    border:1px solid #e0dfd8;
+    border-radius:8px;
+    background:#f5f4f0;
+    color:#888780;
+    cursor:pointer;
+    text-align:center;
+    transition:all .15s;
+  }
+  .tab.active{
+    background:#fff;
+    color:#2c2c2a;
+    border-color:#888780;
+    font-weight:600;
+  }
+  .tab:hover:not(.active){background:#ebe9e3}
+
+  /* metrics */
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .metric{
+    background:#f5f4f0;
+    border-radius:10px;
+    padding:14px 12px;
+  }
+  .metric-label{font-size:11px;color:#888780;margin-bottom:6px}
+  .metric-val{font-size:20px;font-weight:700;color:#2c2c2a;line-height:1.2}
+  .metric-sub{font-size:11px;color:#b4b2a9;margin-top:4px}
+
+  /* flow */
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .flow-box{
+    background:#f5f4f0;
+    border-radius:8px;
+    padding:8px 14px;
+    text-align:center;
+    min-width:72px;
+  }
+  .flow-box strong{display:block;font-size:16px;font-weight:700;color:#2c2c2a}
+  .flow-box span{font-size:11px;color:#888780}
+  .arrow{color:#d3d1c7;font-size:16px}
+
+  /* detail */
+  .detail{
+    font-size:13px;
+    color:#5f5e5a;
+    background:#f5f4f0;
+    border-radius:8px;
+    padding:10px 14px;
+    line-height:1.9;
+    margin-bottom:12px;
+  }
+  .detail b{color:#2c2c2a}
+
+  hr{border:none;border-top:1px solid #f0efe8;margin:14px 0}
+
+  .reset-btn{
+    font-size:12px;
+    color:#888780;
+    background:none;
+    border:1px solid #e0dfd8;
+    border-radius:8px;
+    padding:6px 14px;
+    cursor:pointer;
+    font-family:inherit;
+    transition:background .15s;
+  }
+  .reset-btn:hover{background:#f5f4f0}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<h1>產品單位換算</h1>
+
+<!-- 規格設定 -->
+<div class="card">
+  <div class="section-title">產品規格設定</div>
+  <div class="row">
+    <label>每箱入數</label>
+    <input type="number" id="perBox" value="24" min="1" step="1">
+    <span class="unit">瓶／箱</span>
+  </div>
+  <div class="row" style="margin-bottom:6px">
+    <label>每棧板</label>
+    <input type="number" id="boxPerLayer" value="10" min="1" step="1" style="max-width:80px;flex:none">
+    <span class="unit">箱／層　×</span>
+    <input type="number" id="layers" value="6" min="1" step="1" style="max-width:80px;flex:none">
+    <span class="unit">層</span>
+  </div>
+  <div class="pallet-hint">＝ <span id="perPalletDisplay">60</span> 箱／棧板</div>
+</div>
+
+<!-- 換算方向 -->
+<div class="tab-row">
+  <button class="tab active" id="tab-fwd" onclick="setMode('fwd')">🍶 瓶 → 箱 → 棧板</button>
+  <button class="tab" id="tab-rev" onclick="setMode('rev')">📦 箱 / 棧板 → 瓶</button>
+</div>
+
+<!-- 正向輸入 -->
+<div class="card" id="fwd-input">
+  <div class="section-title">輸入瓶數</div>
+  <div class="row">
+    <label>產品數量</label>
+    <input type="number" class="big" id="qty-bottles" value="5000" min="0" step="1">
+    <span class="unit">瓶</span>
+  </div>
+</div>
+
+<!-- 反向輸入 -->
+<div class="card" id="rev-input" style="display:none">
+  <div class="section-title">輸入數量（可同時填寫）</div>
+  <div class="row">
+    <label>棧板數</label>
+    <input type="number" class="big" id="qty-pallets" value="0" min="0" step="1">
+    <span class="unit">個棧板</span>
+  </div>
+  <div class="row">
+    <label>加上散箱</label>
+    <input type="number" class="big" id="qty-boxes" value="0" min="0" step="1">
+    <span class="unit">箱</span>
+  </div>
+</div>
+
+<!-- 結果 -->
+<div class="metrics" id="metrics-area"></div>
+
+<div class="card">
+  <div class="section-title">換算流程</div>
+  <div class="flow" id="flow-area"></div>
+  <div class="detail" id="detail-area"></div>
+  <hr>
+  <button class="reset-btn" onclick="reset()">↺ 重設</button>
+</div>
+
+<script>
+let mode='fwd';
+
+function setMode(m){
+  mode=m;
+  document.getElementById('tab-fwd').className='tab'+(m==='fwd'?' active':'');
+  document.getElementById('tab-rev').className='tab'+(m==='rev'?' active':'');
+  document.getElementById('fwd-input').style.display=m==='fwd'?'':'none';
+  document.getElementById('rev-input').style.display=m==='rev'?'':'none';
+  calc();
+}
+
+function metric(label,val,sub){
+  return`<div class="metric"><div class="metric-label">${label}</div><div class="metric-val">${val}</div><div class="metric-sub">${sub}</div></div>`;
+}
+function flowBox(val,label){
+  return`<div class="flow-box"><strong>${val}</strong><span>${label}</span></div>`;
+}
+
+function calc(){
+  const perBox=Math.max(1,parseInt(document.getElementById('perBox').value)||1);
+  const boxPerLayer=Math.max(1,parseInt(document.getElementById('boxPerLayer').value)||1);
+  const layerCount=Math.max(1,parseInt(document.getElementById('layers').value)||1);
+  const perPallet=boxPerLayer*layerCount;
+  document.getElementById('perPalletDisplay').textContent=perPallet;
+
+  if(mode==='fwd'){
+    const qty=parseInt(document.getElementById('qty-bottles').value)||0;
+    const totalBoxes=Math.ceil(qty/perBox);
+    const fullBoxes=Math.floor(qty/perBox);
+    const remBottles=qty%perBox;
+    const totalPallets=Math.ceil(totalBoxes/perPallet);
+    const fullPallets=Math.floor(totalBoxes/perPallet);
+    const remBoxes=totalBoxes%perPallet;
+
+    let looseVal,looseSub;
+    if(remBoxes>0&&remBottles>0){looseVal=`${remBoxes}箱+${remBottles}瓶`;looseSub=`末棧板約${Math.ceil(remBoxes/boxPerLayer)}層`;}
+    else if(remBoxes>0){looseVal=`${remBoxes}箱`;looseSub=`末棧板約${Math.ceil(remBoxes/boxPerLayer)}層`;}
+    else if(remBottles>0){looseVal=`${remBottles}瓶`;looseSub=`不足1箱`;}
+    else{looseVal=`無`;looseSub=`全部整棧板`;}
+
+    document.getElementById('metrics-area').innerHTML=
+      metric('需要的箱數',totalBoxes.toLocaleString()+'箱',remBottles>0?`散餘 ${remBottles} 瓶`:`整箱，無餘瓶`)+
+      metric('需要的棧板數',totalPallets.toLocaleString()+'個',remBoxes>0?`末棧板 ${remBoxes} 箱`:`整棧板`)+
+      metric('末棧板明細',looseVal,looseSub);
+
+    document.getElementById('flow-area').innerHTML=
+      flowBox(qty.toLocaleString(),'瓶')+
+      '<span class="arrow">→</span>'+
+      flowBox(totalBoxes.toLocaleString(),'箱（含散）')+
+      '<span class="arrow">→</span>'+
+      flowBox(totalPallets.toLocaleString(),'棧板（含散）');
+
+    let d=`${qty.toLocaleString()} 瓶 ÷ ${perBox} = ${fullBoxes} 整箱`;
+    if(remBottles>0) d+=` + 散裝 ${remBottles} 瓶（計1箱）`;
+    d+=`，共 <b>${totalBoxes} 箱</b><br>`;
+    d+=`${totalBoxes} 箱 ÷ ${perPallet}（${boxPerLayer}×${layerCount}層）= ${fullPallets} 整棧板`;
+    if(remBoxes>0) d+=` + 末棧板 ${remBoxes} 箱`;
+    d+=`，共需 <b>${totalPallets} 棧板</b>`;
+    document.getElementById('detail-area').innerHTML=d;
+
+  } else {
+    const pallets=parseInt(document.getElementById('qty-pallets').value)||0;
+    const extraBoxes=parseInt(document.getElementById('qty-boxes').value)||0;
+    const totalBoxes=pallets*perPallet+extraBoxes;
+    const totalBottles=totalBoxes*perBox;
+
+    document.getElementById('metrics-area').innerHTML=
+      metric('總箱數',totalBoxes.toLocaleString()+'箱',`${pallets}棧板 × ${perPallet} + ${extraBoxes}散箱`)+
+      metric('總瓶數',totalBottles.toLocaleString()+'瓶','整箱計算')+
+      metric('換算確認',`${pallets}板 + ${extraBoxes}箱`,'已輸入數量');
+
+    document.getElementById('flow-area').innerHTML=
+      flowBox(pallets.toLocaleString(),'棧板')+
+      (extraBoxes>0?'<span class="arrow">+</span>'+flowBox(extraBoxes.toLocaleString(),'散箱'):'')+
+      '<span class="arrow">→</span>'+
+      flowBox(totalBoxes.toLocaleString(),'箱')+
+      '<span class="arrow">→</span>'+
+      flowBox(totalBottles.toLocaleString(),'瓶');
+
+    let d=`${pallets} 棧板 × ${perPallet}（${boxPerLayer}×${layerCount}層）= <b>${(pallets*perPallet).toLocaleString()} 箱</b>`;
+    if(extraBoxes>0) d+=` + ${extraBoxes} 散箱 = <b>${totalBoxes.toLocaleString()} 箱</b>`;
+    d+=`<br>${totalBoxes.toLocaleString()} 箱 × ${perBox} 瓶 = <b>${totalBottles.toLocaleString()} 瓶</b>`;
+    document.getElementById('detail-area').innerHTML=d;
+  }
+}
+
+function reset(){
+  document.getElementById('perBox').value=24;
+  document.getElementById('boxPerLayer').value=10;
+  document.getElementById('layers').value=6;
+  document.getElementById('qty-bottles').value=5000;
+  document.getElementById('qty-pallets').value=0;
+  document.getElementById('qty-boxes').value=0;
+  calc();
+}
+
+['perBox','boxPerLayer','layers','qty-bottles','qty-pallets','qty-boxes'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',calc);
+});
+calc();
+</script>
+</body>
+</html>
