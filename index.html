@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>產品單位換算計算機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -72,12 +74,11 @@
     margin-top:-4px;
     margin-bottom:10px;
   }
-
-  /* tabs */
-  .tab-row{display:flex;gap:8px;margin-bottom:12px}
+  .tab-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
   .tab{
     flex:1;
-    padding:9px 0;
+    min-width:120px;
+    padding:9px 8px;
     font-size:13px;
     font-family:inherit;
     border:1px solid #e0dfd8;
@@ -95,32 +96,32 @@
     font-weight:600;
   }
   .tab:hover:not(.active){background:#ebe9e3}
-
-  /* metrics */
-  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+  @media(max-width:500px){.metrics{grid-template-columns:repeat(2,1fr)}}
   .metric{
     background:#f5f4f0;
     border-radius:10px;
-    padding:14px 12px;
+    padding:12px 10px;
   }
-  .metric-label{font-size:11px;color:#888780;margin-bottom:6px}
-  .metric-val{font-size:20px;font-weight:700;color:#2c2c2a;line-height:1.2}
-  .metric-sub{font-size:11px;color:#b4b2a9;margin-top:4px}
-
-  /* flow */
-  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .metric.accent{
+    background:#f0efe8;
+    border:1px solid #d3d1c7;
+  }
+  .metric-label{font-size:11px;color:#888780;margin-bottom:5px}
+  .metric-val{font-size:18px;font-weight:700;color:#2c2c2a;line-height:1.2}
+  .metric-sub{font-size:10px;color:#b4b2a9;margin-top:3px}
+  .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px}
   .flow-box{
     background:#f5f4f0;
     border-radius:8px;
-    padding:8px 14px;
+    padding:7px 12px;
     text-align:center;
-    min-width:72px;
+    min-width:68px;
   }
-  .flow-box strong{display:block;font-size:16px;font-weight:700;color:#2c2c2a}
-  .flow-box span{font-size:11px;color:#888780}
-  .arrow{color:#d3d1c7;font-size:16px}
-
-  /* detail */
+  .flow-box.psd-box{border:1px solid #d3d1c7;background:#f0efe8}
+  .flow-box strong{display:block;font-size:15px;font-weight:700;color:#2c2c2a}
+  .flow-box span{font-size:10px;color:#888780}
+  .arrow{color:#d3d1c7;font-size:14px}
   .detail{
     font-size:13px;
     color:#5f5e5a;
@@ -131,9 +132,7 @@
     margin-bottom:12px;
   }
   .detail b{color:#2c2c2a}
-
-  hr{border:none;border-top:1px solid #f0efe8;margin:14px 0}
-
+  hr{border:none;border-top:1px solid #f0efe8;margin:12px 0}
   .reset-btn{
     font-size:12px;
     color:#888780;
@@ -147,8 +146,6 @@
   }
   .reset-btn:hover{background:#f5f4f0}
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -158,11 +155,16 @@
 <div class="card">
   <div class="section-title">產品規格設定</div>
   <div class="row">
+    <label>1 PSD</label>
+    <input type="number" id="psdBase" value="4500" min="1" step="1">
+    <span class="unit">瓶</span>
+  </div>
+  <div class="row">
     <label>每箱入數</label>
     <input type="number" id="perBox" value="24" min="1" step="1">
     <span class="unit">瓶／箱</span>
   </div>
-  <div class="row" style="margin-bottom:6px">
+  <div class="row" style="margin-bottom:4px">
     <label>每棧板</label>
     <input type="number" id="boxPerLayer" value="10" min="1" step="1" style="max-width:80px;flex:none">
     <span class="unit">箱／層　×</span>
@@ -172,14 +174,25 @@
   <div class="pallet-hint">＝ <span id="perPalletDisplay">60</span> 箱／棧板</div>
 </div>
 
-<!-- 換算方向 -->
+<!-- 換算方向 tabs -->
 <div class="tab-row">
-  <button class="tab active" id="tab-fwd" onclick="setMode('fwd')">🍶 瓶 → 箱 → 棧板</button>
-  <button class="tab" id="tab-rev" onclick="setMode('rev')">📦 箱 / 棧板 → 瓶</button>
+  <button class="tab active" id="tab-psd" onclick="setMode('psd')">📊 PSD → 瓶／箱／棧板</button>
+  <button class="tab" id="tab-fwd" onclick="setMode('fwd')">🍶 瓶 → 箱 → 棧板</button>
+  <button class="tab" id="tab-rev" onclick="setMode('rev')">📦 箱／棧板 → 瓶</button>
+</div>
+
+<!-- PSD 輸入 -->
+<div class="card" id="psd-input">
+  <div class="section-title">輸入 PSD 倍數</div>
+  <div class="row">
+    <label>PSD 倍數</label>
+    <input type="number" class="big" id="qty-psd" value="1" min="0" step="0.5">
+    <span class="unit">PSD</span>
+  </div>
 </div>
 
 <!-- 正向輸入 -->
-<div class="card" id="fwd-input">
+<div class="card" id="fwd-input" style="display:none">
   <div class="section-title">輸入瓶數</div>
   <div class="row">
     <label>產品數量</label>
@@ -215,64 +228,107 @@
 </div>
 
 <script>
-let mode='fwd';
+let mode='psd';
 
 function setMode(m){
   mode=m;
-  document.getElementById('tab-fwd').className='tab'+(m==='fwd'?' active':'');
-  document.getElementById('tab-rev').className='tab'+(m==='rev'?' active':'');
-  document.getElementById('fwd-input').style.display=m==='fwd'?'':'none';
-  document.getElementById('rev-input').style.display=m==='rev'?'':'none';
+  ['psd','fwd','rev'].forEach(t=>{
+    document.getElementById('tab-'+t).className='tab'+(m===t?' active':'');
+    document.getElementById(t+'-input').style.display=m===t?'':'none';
+  });
   calc();
 }
 
-function metric(label,val,sub){
-  return`<div class="metric"><div class="metric-label">${label}</div><div class="metric-val">${val}</div><div class="metric-sub">${sub}</div></div>`;
+function metric(label,val,sub,accent){
+  return'<div class="metric'+(accent?' accent':'')+'">'+
+    '<div class="metric-label">'+label+'</div>'+
+    '<div class="metric-val">'+val+'</div>'+
+    '<div class="metric-sub">'+sub+'</div>'+
+  '</div>';
 }
-function flowBox(val,label){
-  return`<div class="flow-box"><strong>${val}</strong><span>${label}</span></div>`;
+function flowBox(val,label,cls){
+  return'<div class="flow-box'+(cls?' '+cls:'')+'">'+
+    '<strong>'+val+'</strong><span>'+label+'</span>'+
+  '</div>';
 }
 
 function calc(){
+  const psdBase=Math.max(1,parseFloat(document.getElementById('psdBase').value)||4500);
   const perBox=Math.max(1,parseInt(document.getElementById('perBox').value)||1);
   const boxPerLayer=Math.max(1,parseInt(document.getElementById('boxPerLayer').value)||1);
   const layerCount=Math.max(1,parseInt(document.getElementById('layers').value)||1);
   const perPallet=boxPerLayer*layerCount;
   document.getElementById('perPalletDisplay').textContent=perPallet;
 
-  if(mode==='fwd'){
-    const qty=parseInt(document.getElementById('qty-bottles').value)||0;
+  if(mode==='psd'){
+    const psdMul=parseFloat(document.getElementById('qty-psd').value)||0;
+    const qty=Math.round(psdMul*psdBase);
     const totalBoxes=Math.ceil(qty/perBox);
     const fullBoxes=Math.floor(qty/perBox);
     const remBottles=qty%perBox;
     const totalPallets=Math.ceil(totalBoxes/perPallet);
     const fullPallets=Math.floor(totalBoxes/perPallet);
     const remBoxes=totalBoxes%perPallet;
-
-    let looseVal,looseSub;
-    if(remBoxes>0&&remBottles>0){looseVal=`${remBoxes}箱+${remBottles}瓶`;looseSub=`末棧板約${Math.ceil(remBoxes/boxPerLayer)}層`;}
-    else if(remBoxes>0){looseVal=`${remBoxes}箱`;looseSub=`末棧板約${Math.ceil(remBoxes/boxPerLayer)}層`;}
-    else if(remBottles>0){looseVal=`${remBottles}瓶`;looseSub=`不足1箱`;}
-    else{looseVal=`無`;looseSub=`全部整棧板`;}
+    const looseSub=remBoxes>0?'末棧板約'+Math.ceil(remBoxes/boxPerLayer)+'層':(remBottles>0?'不足1箱':'全整棧板');
+    const looseVal=(remBoxes>0&&remBottles>0)?remBoxes+'箱+'+remBottles+'瓶':remBoxes>0?remBoxes+'箱':remBottles>0?remBottles+'瓶':'無';
 
     document.getElementById('metrics-area').innerHTML=
-      metric('需要的箱數',totalBoxes.toLocaleString()+'箱',remBottles>0?`散餘 ${remBottles} 瓶`:`整箱，無餘瓶`)+
-      metric('需要的棧板數',totalPallets.toLocaleString()+'個',remBoxes>0?`末棧板 ${remBoxes} 箱`:`整棧板`)+
+      metric('PSD 倍數',psdMul+' PSD','＝ '+qty.toLocaleString()+' 瓶',true)+
+      metric('需要的箱數',totalBoxes.toLocaleString()+'箱',remBottles>0?'散餘'+remBottles+'瓶':'整箱')+
+      metric('需要的棧板數',totalPallets.toLocaleString()+'個',remBoxes>0?'末棧板'+remBoxes+'箱':'整棧板')+
       metric('末棧板明細',looseVal,looseSub);
 
     document.getElementById('flow-area').innerHTML=
+      flowBox(psdMul,'PSD','psd-box')+
+      '<span class="arrow">→</span>'+
       flowBox(qty.toLocaleString(),'瓶')+
       '<span class="arrow">→</span>'+
       flowBox(totalBoxes.toLocaleString(),'箱（含散）')+
       '<span class="arrow">→</span>'+
       flowBox(totalPallets.toLocaleString(),'棧板（含散）');
 
-    let d=`${qty.toLocaleString()} 瓶 ÷ ${perBox} = ${fullBoxes} 整箱`;
-    if(remBottles>0) d+=` + 散裝 ${remBottles} 瓶（計1箱）`;
-    d+=`，共 <b>${totalBoxes} 箱</b><br>`;
-    d+=`${totalBoxes} 箱 ÷ ${perPallet}（${boxPerLayer}×${layerCount}層）= ${fullPallets} 整棧板`;
-    if(remBoxes>0) d+=` + 末棧板 ${remBoxes} 箱`;
-    d+=`，共需 <b>${totalPallets} 棧板</b>`;
+    let d=psdMul+' PSD × '+psdBase.toLocaleString()+' = <b>'+qty.toLocaleString()+' 瓶</b><br>';
+    d+=qty.toLocaleString()+' ÷ '+perBox+' = '+fullBoxes+' 整箱';
+    if(remBottles>0) d+=' + 散裝'+remBottles+'瓶（計1箱）';
+    d+='，共 <b>'+totalBoxes+' 箱</b><br>';
+    d+=totalBoxes+' ÷ '+perPallet+'（'+boxPerLayer+'×'+layerCount+'層）= '+fullPallets+' 整棧板';
+    if(remBoxes>0) d+=' + 末棧板'+remBoxes+'箱';
+    d+='，共需 <b>'+totalPallets+' 棧板</b>';
+    document.getElementById('detail-area').innerHTML=d;
+
+  } else if(mode==='fwd'){
+    const qty=parseInt(document.getElementById('qty-bottles').value)||0;
+    const psdVal=(qty/psdBase).toFixed(2);
+    const totalBoxes=Math.ceil(qty/perBox);
+    const fullBoxes=Math.floor(qty/perBox);
+    const remBottles=qty%perBox;
+    const totalPallets=Math.ceil(totalBoxes/perPallet);
+    const fullPallets=Math.floor(totalBoxes/perPallet);
+    const remBoxes=totalBoxes%perPallet;
+    const looseVal=(remBoxes>0&&remBottles>0)?remBoxes+'箱+'+remBottles+'瓶':remBoxes>0?remBoxes+'箱':remBottles>0?remBottles+'瓶':'無';
+
+    document.getElementById('metrics-area').innerHTML=
+      metric('換算 PSD',psdVal+' PSD','＝ '+qty.toLocaleString()+' 瓶',true)+
+      metric('需要的箱數',totalBoxes.toLocaleString()+'箱',remBottles>0?'散餘'+remBottles+'瓶':'整箱')+
+      metric('需要的棧板數',totalPallets.toLocaleString()+'個',remBoxes>0?'末棧板'+remBoxes+'箱':'整棧板')+
+      metric('末棧板明細',looseVal,remBoxes>0?'末棧板約'+Math.ceil(remBoxes/boxPerLayer)+'層':'全整棧板');
+
+    document.getElementById('flow-area').innerHTML=
+      flowBox(qty.toLocaleString(),'瓶')+
+      '<span class="arrow">→</span>'+
+      flowBox(psdVal,'PSD','psd-box')+
+      '<span class="arrow"> | </span>'+
+      flowBox(totalBoxes.toLocaleString(),'箱（含散）')+
+      '<span class="arrow">→</span>'+
+      flowBox(totalPallets.toLocaleString(),'棧板（含散）');
+
+    let d=qty.toLocaleString()+' 瓶 ÷ '+psdBase.toLocaleString()+' = <b>'+psdVal+' PSD</b><br>';
+    d+=qty.toLocaleString()+' ÷ '+perBox+' = '+fullBoxes+' 整箱';
+    if(remBottles>0) d+=' + 散裝'+remBottles+'瓶（計1箱）';
+    d+='，共 <b>'+totalBoxes+' 箱</b><br>';
+    d+=totalBoxes+' ÷ '+perPallet+'（'+boxPerLayer+'×'+layerCount+'層）= '+fullPallets+' 整棧板';
+    if(remBoxes>0) d+=' + 末棧板'+remBoxes+'箱';
+    d+='，共需 <b>'+totalPallets+' 棧板</b>';
     document.getElementById('detail-area').innerHTML=d;
 
   } else {
@@ -280,11 +336,13 @@ function calc(){
     const extraBoxes=parseInt(document.getElementById('qty-boxes').value)||0;
     const totalBoxes=pallets*perPallet+extraBoxes;
     const totalBottles=totalBoxes*perBox;
+    const psdVal=(totalBottles/psdBase).toFixed(2);
 
     document.getElementById('metrics-area').innerHTML=
-      metric('總箱數',totalBoxes.toLocaleString()+'箱',`${pallets}棧板 × ${perPallet} + ${extraBoxes}散箱`)+
+      metric('換算 PSD',psdVal+' PSD','＝ '+totalBottles.toLocaleString()+' 瓶',true)+
+      metric('總箱數',totalBoxes.toLocaleString()+'箱',pallets+'棧板+'+extraBoxes+'散箱')+
       metric('總瓶數',totalBottles.toLocaleString()+'瓶','整箱計算')+
-      metric('換算確認',`${pallets}板 + ${extraBoxes}箱`,'已輸入數量');
+      metric('棧板明細',pallets+'板 + '+extraBoxes+'箱','已輸入數量');
 
     document.getElementById('flow-area').innerHTML=
       flowBox(pallets.toLocaleString(),'棧板')+
@@ -292,26 +350,31 @@ function calc(){
       '<span class="arrow">→</span>'+
       flowBox(totalBoxes.toLocaleString(),'箱')+
       '<span class="arrow">→</span>'+
-      flowBox(totalBottles.toLocaleString(),'瓶');
+      flowBox(totalBottles.toLocaleString(),'瓶')+
+      '<span class="arrow">→</span>'+
+      flowBox(psdVal,'PSD','psd-box');
 
-    let d=`${pallets} 棧板 × ${perPallet}（${boxPerLayer}×${layerCount}層）= <b>${(pallets*perPallet).toLocaleString()} 箱</b>`;
-    if(extraBoxes>0) d+=` + ${extraBoxes} 散箱 = <b>${totalBoxes.toLocaleString()} 箱</b>`;
-    d+=`<br>${totalBoxes.toLocaleString()} 箱 × ${perBox} 瓶 = <b>${totalBottles.toLocaleString()} 瓶</b>`;
+    let d=pallets+' 棧板 × '+perPallet+'（'+boxPerLayer+'×'+layerCount+'層）= '+(pallets*perPallet).toLocaleString()+' 箱';
+    if(extraBoxes>0) d+=' + '+extraBoxes+' 散箱 = <b>'+totalBoxes.toLocaleString()+' 箱</b>';
+    d+='<br>'+totalBoxes.toLocaleString()+' 箱 × '+perBox+' = <b>'+totalBottles.toLocaleString()+' 瓶</b>';
+    d+='<br>'+totalBottles.toLocaleString()+' ÷ '+psdBase.toLocaleString()+' = <b>'+psdVal+' PSD</b>';
     document.getElementById('detail-area').innerHTML=d;
   }
 }
 
 function reset(){
+  document.getElementById('psdBase').value=4500;
   document.getElementById('perBox').value=24;
   document.getElementById('boxPerLayer').value=10;
   document.getElementById('layers').value=6;
+  document.getElementById('qty-psd').value=1;
   document.getElementById('qty-bottles').value=5000;
   document.getElementById('qty-pallets').value=0;
   document.getElementById('qty-boxes').value=0;
   calc();
 }
 
-['perBox','boxPerLayer','layers','qty-bottles','qty-pallets','qty-boxes'].forEach(id=>{
+['psdBase','perBox','boxPerLayer','layers','qty-psd','qty-bottles','qty-pallets','qty-boxes'].forEach(function(id){
   document.getElementById(id).addEventListener('input',calc);
 });
 calc();
